@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vertical Ruler with Canvas</title>
+    <style>
+        canvas {
+            border: 1px solid #000;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="verticalRulerCanvas" width="30" height="300"></canvas>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Ambil elemen canvas dan konteksnya
+            var canvas = document.getElementById("verticalRulerCanvas");
+            var context = canvas.getContext("2d");
+
+            // Fungsi untuk menggambar garis-garis pada penggaris vertikal
+            function drawVerticalRuler() {
+                // Bersihkan canvas
+                context.clearRect(0, 0, canvas.width, canvas.height);
+
+                // Atur properti garis
+                context.strokeStyle = "#000";
+                context.lineWidth = 1;
+
+                // Gambar garis utama
+                context.beginPath();
+                context.moveTo(15, 0);
+                context.lineTo(15, canvas.height);
+                context.stroke();
+
+                // Gambar garis-garis kecil setiap 10 piksel
+                for (var i = 0; i <= canvas.height; i += 10) {
+                    context.beginPath();
+                    context.moveTo(10, i);
+                    context.lineTo(20, i);
+                    context.stroke();
+
+                    // Tambahkan angka pada setiap 50 piksel
+                    if (i % 50 === 0) {
+                        context.fillText(i.toString(), 5, i + 5);
+                    }
+                }
+            }
+
+            // Panggil fungsi untuk pertama kali
+            drawVerticalRuler();
+        });
+    </script>
+</body>
+</html>
