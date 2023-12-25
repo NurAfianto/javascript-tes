@@ -172,6 +172,7 @@ LayupDrawer.prototype = {
         let canvas = this.canvas;
         let context = canvas.getContext("2d");
         let height = totalThickness;
+        let space = height / 18;
         // Bersihkan canvas
         context.clearRect(0, 0, canvas.width, height);
 
@@ -181,19 +182,19 @@ LayupDrawer.prototype = {
 
         // Gambar garis utama
         context.beginPath();
-        context.moveTo(15, 0);
+        context.moveTo(15, 10);
         context.lineTo(15, height);
         context.stroke();
 
         // Gambar garis-garis kecil setiap 10 piksel
-        for (var i = 0; i <= height; i += 10) {
+        let number_start = 180;
+        for (var i = 0; i <= height; i += space) {
             context.beginPath();
-            context.moveTo(10, i);
-            context.lineTo(20, i);
+            context.moveTo(100, i);
+            context.lineTo(200, i);
             context.stroke();
 
-            // Tambahkan angka pada setiap 50 piksel
-            context.fillText(i.toString(), 5, i + 5);
+            context.fillText(number_start, 5, i + 5);
         }
     }
 };
