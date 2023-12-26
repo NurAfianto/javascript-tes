@@ -5,6 +5,9 @@ function LayupDrawer() {
      * Canvas element
      */
     this.canvas = null;
+    this.PADDINGLEFT = 40;
+    this.PADDINGRIGHT = 60;
+    this.PADDINGTOP = 40;
 }
 
 LayupDrawer.prototype = {
@@ -26,8 +29,9 @@ LayupDrawer.prototype = {
     drawLayup : function (layup, length) {
         let canvas = this.canvas;
         let ctx = canvas.getContext('2d');
-        let paddingLeft = 40;
-        let paddingRight = 60;
+        let paddingLeft = this.PADDINGLEFT;
+        let paddingRight = this.PADDINGRIGHT;
+        let paddingTop = this.PADDINGTOP;
         let canvasWidth = canvas.width - paddingLeft - paddingRight;
 
         let imgAngle0 = new Image();
@@ -35,13 +39,13 @@ LayupDrawer.prototype = {
 
         // TIER 1 
         let layer1Thickness = layup.t1.thickness;
-        let positionTier1Y = 0;
+        let positionTier1Y = paddingTop;
         // TIER 3 
         let layer3Thickness = layup.t3.thickness;
-        let positionTier3Y = layup.t1.thickness + layup.t2.thickness;
+        let positionTier3Y = layup.t1.thickness + layup.t2.thickness + paddingTop;
         // TIER 5
         let layer5Thickness = layup.t5.thickness;
-        let positionTier5Y = layup.t1.thickness + layup.t2.thickness + layup.t3.thickness + layup.t4.thickness;
+        let positionTier5Y = layup.t1.thickness + layup.t2.thickness + layup.t3.thickness + layup.t4.thickness + paddingTop;
         imgAngle0.onload = function(){
             // DRAW TIER 1
             ctx.drawImage(imgAngle0, paddingLeft, positionTier1Y, canvasWidth, layer1Thickness);
@@ -53,10 +57,10 @@ LayupDrawer.prototype = {
 
         // TIER 2
         let layer2Thickness = layup.t2.thickness;
-        let positionTier2Y = layup.t1.thickness;
+        let positionTier2Y = layup.t1.thickness + paddingTop;
         // TIER 4 
         let layer4Thickness = layup.t4.thickness;
-        let positionTier4Y = layup.t1.thickness + layup.t2.thickness + layup.t3.thickness;
+        let positionTier4Y = layup.t1.thickness + layup.t2.thickness + layup.t3.thickness + paddingTop;
         imgAngle90.onload = function() {
             let widthHalfImage = imgAngle90.width / 2;
             let heightImage = imgAngle90.height;
@@ -78,15 +82,21 @@ LayupDrawer.prototype = {
         imgAngle90.src = 'images/perpendicular-grain-90.jpg';
         
         // Draw Line Bottom 
-        let bottom = layup.t1.thickness + layup.t2.thickness + layup.t3.thickness + layup.t4.thickness + layup.t5.thickness;
-        this.drawLine(0, bottom + 1, canvas.width, bottom + 1, '#000', 0.1);
-
-        this.drawRuler(0, 500, bottom, 30);
-
+        let totalThickness = layup.t1.thickness + layup.t2.thickness + layup.t3.thickness + layup.t4.thickness + layup.t5.thickness;
+        // this.drawLine(0, totalThickness, canvas.width, totalThickness, '#000', 0.1);
         // Draw Ruler Bottom 
-        this.drawRulerBottom(bottom, canvasWidth);
+        this.drawRulerBottom(totalThickness, canvasWidth);
         // Draw Ruler Left
-        this.drawRulerLeft(bottom, canvasWidth);
+        // this.drawRulerLeft(bottom, canvasWidth);
+        this.drawRulerLeft2(totalThickness, canvasWidth);
+        // Draw Note Right
+        ctx.font = "8px Arial";
+        ctx.fillText("t1:" + layer1Thickness + " " + layup.t1.grade, canvasWidth + 45, layer1Thickness/2 + paddingTop);
+        ctx.fillText("t2:" + layer2Thickness + " " + layup.t2.grade, canvasWidth + 45, positionTier2Y + (layer2Thickness/2));
+        ctx.fillText("t3:" + layer3Thickness + " " + layup.t3.grade, canvasWidth + 45, positionTier3Y + (layer3Thickness/2));
+        ctx.fillText("t4:" + layer4Thickness + " " + layup.t4.grade, canvasWidth + 45, positionTier4Y + (layer4Thickness/2));
+        ctx.fillText("t5:" + layer5Thickness + " " + layup.t5.grade, canvasWidth + 45, positionTier5Y + (layer5Thickness/2));
+        ctx.restore();
     },
 
     /**
@@ -100,9 +110,10 @@ LayupDrawer.prototype = {
                     stroke = color line
                     width = thickness of line 
     */
-    drawLine : function (x1, y1, x2,y2, stroke = '#000', width = 1) {
+    drawLine : function (x1, y1, x2,y2, stroke = '#000', width = 0.1) {
         let canvas = this.canvas;
         let ctx = canvas.getContext('2d');
+        let paddingTop = this.PADDINGTOP;
         ctx.beginPath();
         ctx.moveTo(x1, y1);
         ctx.lineTo(x2, y2);
@@ -110,37 +121,22 @@ LayupDrawer.prototype = {
         ctx.lineWidth = width;
         ctx.stroke();
     },
-    // @param      x1 = x start
-    //             x2 = x finish
-    //             space = interval 
-    //             stroke = warna 
-    //             lineWidth = width line
-    drawRuler : function (x1, x2, y, space, stroke='#000',lineWidth=0.1, startY = 700) {
-        let canvas = this.canvas;
-        let context = canvas.getContext('2d');
-        let spacing = 20;
-        context.lineWidth= lineWidth;
-        context.strokeStyle = stroke;
-        context.beginPath();
-        for(let interval = 40; interval < 450; interval+= 10)
-        {
-            context.moveTo(interval*spacing+0.5, y);
-            context.lineTo(interval*spacing+0.5, y+15);
-            context.stroke();
-        }
-    },
+    /**  @param     totalThickness 
+                    canvasWidth
+    */
     drawRulerBottom : function (totalThickness, canvasWidth) {
         let canvas = this.canvas;
         let context = canvas.getContext("2d");
+        let paddingTop = this.PADDINGTOP;
         
         context.clearRect(0, 0, canvas.width, canvas.height);
 
         context.strokeStyle = "#000";
-        context.lineWidth = 0.5;
+        context.lineWidth = 0.1;
 
         context.beginPath();
-        context.moveTo(30, totalThickness);
-        context.lineTo(canvas.width, totalThickness);
+        context.moveTo(30, totalThickness + paddingTop);
+        context.lineTo(canvas.width, totalThickness + paddingTop);
         context.stroke();
 
         let numberRuler = 0;
@@ -149,52 +145,121 @@ LayupDrawer.prototype = {
             let space = (canvasWidth/25);
 
             context.beginPath();
-            context.moveTo((i*space) + 40, totalThickness);
-            context.lineTo((i*space) + 40, totalThickness + 10);
+            context.moveTo((i*space) + 40, totalThickness + paddingTop);
+            context.lineTo((i*space) + 40, totalThickness + 10 + paddingTop);
             context.stroke();
             
             if (i % 5 == 0) {
-                if(numberRuler == 0){
-                    posNumber = ((i*space) + 38);
-                }else if(numberRuler < 99){
-                    posNumber = ((i*space) + 34);
-                }else{
-                    posNumber = ((i*space) + 30);
-                }
-                context.fillText(numberRuler.toString(), posNumber, totalThickness + 20);
+                posNumber = ((i*space) + 38);
+                
+                context.save(); 
+                context.translate(posNumber, totalThickness + 25 + paddingTop);  
+                context.rotate(7 * (Math.PI / 4)); 
+                context.fillText(numberRuler.toString(), 0, 0);
+                context.restore(); 
                 numberRuler += 30;
             }
         }
         // Primary Direction
-        context.fillText("Primary Direction", canvasWidth/2, totalThickness + 50);
+        context.fillText("Primary Direction", canvasWidth/2, totalThickness + 50 + paddingTop);
     },
     drawRulerLeft: function (totalThickness, canvasWidth) {
         let canvas = this.canvas;
         let context = canvas.getContext("2d");
         let height = totalThickness;
-        let space = height / 18;
+        let space = height / 18.5;
         // Bersihkan canvas
-        context.clearRect(0, 0, canvas.width, height);
+        context.clearRect(0, 0, canvasWidth, height);
 
         // Atur properti garis
         context.strokeStyle = "#000";
-        context.lineWidth = 0.5;
+        context.lineWidth = 0.1;
 
         // Gambar garis utama
         context.beginPath();
-        context.moveTo(15, 10);
-        context.lineTo(15, height);
+        context.moveTo(40, 0);
+        context.lineTo(40, height);
         context.stroke();
 
-        // Gambar garis-garis kecil setiap 10 piksel
-        let number_start = 180;
-        for (var i = 0; i <= height; i += space) {
+        let numberRuler = 180;
+        let distance = 0;
+        let positionRuler = 3.5;
+        
+        context.beginPath();
+        context.moveTo(34, 0);
+        context.lineTo(40, 0);
+        context.stroke();
+        context.fillText(totalThickness, 20, space);
+
+        for (var i = 0; i <= 19; i ++) {
+            
+            distance = space * i;
+            // if(positionRuler < i){
+            //     positionRuler += 5;
+            // }
+
             context.beginPath();
-            context.moveTo(100, i);
-            context.lineTo(200, i);
+            context.moveTo(34, distance);
+            context.lineTo(40, distance);
             context.stroke();
 
-            context.fillText(number_start, 5, i + 5);
+            // if(positionRuler == i){
+                context.fillText(numberRuler, 20, distance + 5);
+                numberRuler -= 60;
+            // }
         }
-    }
+        
+        // Slab Thickness (mm)
+        context.save();
+        context.translate(0, totalThickness + 50); 
+        context.rotate(3 * Math.PI/2);
+        context.fillText("Slab Thickness (mm)", height / 2, 10); 
+        context.restore(); 
+    },
+    drawRulerLeft2: function (totalThickness, canvasWidth) {
+        let canvas = this.canvas;
+        let context = canvas.getContext("2d");
+        let paddingTop = this.PADDINGTOP;
+        let height = totalThickness + paddingTop;
+        let spacing = (totalThickness < 150 ? 40 : 30);
+        let start = (totalThickness % spacing);
+
+        // DRAW LINE VERTICAL 
+        context.clearRect(0, 0, canvasWidth, height);
+        context.strokeStyle = "#000";
+        context.lineWidth = 0.1;
+        context.beginPath();
+        context.moveTo(40, paddingTop);
+        context.lineTo(40, height);
+        context.stroke();
+
+        let numberRuler = totalThickness - start;
+        if(start != 0){
+            context.beginPath();
+            context.moveTo(34, paddingTop);
+            context.lineTo(40, paddingTop);
+            context.stroke();
+            context.fillText(totalThickness, 20, paddingTop - 5);
+        }
+
+        for (var i = (start + paddingTop); i <= height; i += spacing) {
+            context.beginPath();
+            context.moveTo(34, i);
+            context.lineTo(40, i);
+            context.stroke();
+
+            // Tambahkan angka pada setiap 50 piksel
+            // if (i % 50 === 0) {
+                context.fillText(numberRuler.toString(), 20, i + 5);
+                numberRuler -= spacing;
+            // }
+        }
+        
+        // Slab Thickness (mm)
+        context.save();
+        context.translate(0, totalThickness + 50); 
+        context.rotate(3 * Math.PI/2);
+        context.fillText("Slab Thickness (mm)", height / 2, 10); 
+        context.restore(); 
+    },
 };
