@@ -83,12 +83,10 @@ LayupDrawer.prototype = {
         
         // Draw Line Bottom 
         let totalThickness = layup.t1.thickness + layup.t2.thickness + layup.t3.thickness + layup.t4.thickness + layup.t5.thickness;
-        // this.drawLine(0, totalThickness, canvas.width, totalThickness, '#000', 0.1);
         // Draw Ruler Bottom 
         this.drawRulerBottom(totalThickness, canvasWidth);
         // Draw Ruler Left
-        // this.drawRulerLeft(bottom, canvasWidth);
-        this.drawRulerLeft2(totalThickness, canvasWidth);
+        this.drawRulerLeft(totalThickness, canvasWidth);
         // Draw Note Right
         ctx.font = "8px Arial";
         ctx.fillText("t1:" + layer1Thickness + " " + layup.t1.grade, canvasWidth + 45, layer1Thickness/2 + paddingTop);
@@ -102,25 +100,7 @@ LayupDrawer.prototype = {
     /**
      * Add more functions as you need
      */
-
-    /**  @param     x1 = x Start 
-                    y1 = y start
-                    x2 = x finish
-                    y2 = y finish
-                    stroke = color line
-                    width = thickness of line 
-    */
-    drawLine : function (x1, y1, x2,y2, stroke = '#000', width = 0.1) {
-        let canvas = this.canvas;
-        let ctx = canvas.getContext('2d');
-        let paddingTop = this.PADDINGTOP;
-        ctx.beginPath();
-        ctx.moveTo(x1, y1);
-        ctx.lineTo(x2, y2);
-        ctx.strokeStyle = stroke;
-        ctx.lineWidth = width;
-        ctx.stroke();
-    },
+    
     /**  @param     totalThickness 
                     canvasWidth
     */
@@ -166,59 +146,6 @@ LayupDrawer.prototype = {
     drawRulerLeft: function (totalThickness, canvasWidth) {
         let canvas = this.canvas;
         let context = canvas.getContext("2d");
-        let height = totalThickness;
-        let space = height / 18.5;
-        // Bersihkan canvas
-        context.clearRect(0, 0, canvasWidth, height);
-
-        // Atur properti garis
-        context.strokeStyle = "#000";
-        context.lineWidth = 0.1;
-
-        // Gambar garis utama
-        context.beginPath();
-        context.moveTo(40, 0);
-        context.lineTo(40, height);
-        context.stroke();
-
-        let numberRuler = 180;
-        let distance = 0;
-        let positionRuler = 3.5;
-        
-        context.beginPath();
-        context.moveTo(34, 0);
-        context.lineTo(40, 0);
-        context.stroke();
-        context.fillText(totalThickness, 20, space);
-
-        for (var i = 0; i <= 19; i ++) {
-            
-            distance = space * i;
-            // if(positionRuler < i){
-            //     positionRuler += 5;
-            // }
-
-            context.beginPath();
-            context.moveTo(34, distance);
-            context.lineTo(40, distance);
-            context.stroke();
-
-            // if(positionRuler == i){
-                context.fillText(numberRuler, 20, distance + 5);
-                numberRuler -= 60;
-            // }
-        }
-        
-        // Slab Thickness (mm)
-        context.save();
-        context.translate(0, totalThickness + 50); 
-        context.rotate(3 * Math.PI/2);
-        context.fillText("Slab Thickness (mm)", height / 2, 10); 
-        context.restore(); 
-    },
-    drawRulerLeft2: function (totalThickness, canvasWidth) {
-        let canvas = this.canvas;
-        let context = canvas.getContext("2d");
         let paddingTop = this.PADDINGTOP;
         let height = totalThickness + paddingTop;
         let spacing = (totalThickness < 150 ? 40 : 30);
@@ -233,6 +160,7 @@ LayupDrawer.prototype = {
         context.lineTo(40, height);
         context.stroke();
 
+        // TOP NUMBER OF RULER 
         let numberRuler = totalThickness - start;
         if(start != 0){
             context.beginPath();
@@ -242,24 +170,22 @@ LayupDrawer.prototype = {
             context.fillText(totalThickness, 20, paddingTop - 5);
         }
 
+        // WRITE NUMBER IN RULER 
         for (var i = (start + paddingTop); i <= height; i += spacing) {
             context.beginPath();
             context.moveTo(34, i);
             context.lineTo(40, i);
             context.stroke();
 
-            // Tambahkan angka pada setiap 50 piksel
-            // if (i % 50 === 0) {
-                context.fillText(numberRuler.toString(), 20, i + 5);
-                numberRuler -= spacing;
-            // }
+            context.fillText(numberRuler.toString(), 20, i + 5);
+            numberRuler -= spacing;
         }
         
         // Slab Thickness (mm)
         context.save();
         context.translate(0, totalThickness + 50); 
         context.rotate(3 * Math.PI/2);
-        context.fillText("Slab Thickness (mm)", height / 2, 10); 
+        context.fillText("Slab Thickness (mm)", (totalThickness / 2) - this.PADDINGTOP, 10); 
         context.restore(); 
     },
 };
