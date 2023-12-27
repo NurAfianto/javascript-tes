@@ -27,6 +27,7 @@ LayupDrawer.prototype = {
      * @param {Number} length Layup length in mm
      */
     drawLayup : function (layup, length) {
+        
         let canvas = this.canvas;
         let ctx = canvas.getContext('2d');
         let paddingLeft = this.PADDINGLEFT;
@@ -34,73 +35,66 @@ LayupDrawer.prototype = {
         let paddingTop = this.PADDINGTOP;
         let canvasWidth = canvas.width - paddingLeft - paddingRight;
 
-        let imgAngle0 = new Image();
-        let imgAngle90 = new Image();
+        let totalThickness = 0;
 
-        // TIER 1 
-        let layer1Thickness = layup.t1.thickness;
-        let positionTier1Y = paddingTop;
-        // TIER 3 
-        let layer3Thickness = layup.t3.thickness;
-        let positionTier3Y = layup.t1.thickness + layup.t2.thickness + paddingTop;
-        // TIER 5
-        let layer5Thickness = layup.t5.thickness;
-        let positionTier5Y = layup.t1.thickness + layup.t2.thickness + layup.t3.thickness + layup.t4.thickness + paddingTop;
-        imgAngle0.onload = function(){
-            // DRAW TIER 1
-            ctx.drawImage(imgAngle0, paddingLeft, positionTier1Y, canvasWidth, layer1Thickness);
-            // DRAW TIER 3
-            ctx.drawImage(imgAngle0, paddingLeft, positionTier3Y, canvasWidth, layer3Thickness);
-            // DRAW TIER 5
-            ctx.drawImage(imgAngle0, paddingLeft, positionTier5Y, canvasWidth, layer5Thickness);
-        };
-
-        // TIER 2
-        let layer2Thickness = layup.t2.thickness;
-        let positionTier2Y = layup.t1.thickness + paddingTop;
-        // TIER 4 
-        let layer4Thickness = layup.t4.thickness;
-        let positionTier4Y = layup.t1.thickness + layup.t2.thickness + layup.t3.thickness + paddingTop;
-        imgAngle90.onload = function() {
-            let widthHalfImage = imgAngle90.width / 2;
-            let heightImage = imgAngle90.height;
-            // DRAW IMAGE TIER 2
-            ctx.drawImage(imgAngle90, widthHalfImage, 0, widthHalfImage, heightImage, paddingLeft, positionTier2Y, canvasWidth/8, layer2Thickness);
-            ctx.drawImage(imgAngle90, canvasWidth/8 - 0.1 + paddingLeft, positionTier2Y, canvasWidth/4, layer2Thickness);
-            ctx.drawImage(imgAngle90, canvasWidth/8 * 3 - 0.1 + paddingLeft, positionTier2Y, canvasWidth/4, layer2Thickness);
-            ctx.drawImage(imgAngle90, canvasWidth/8 * 5 - 0.1 + paddingLeft, positionTier2Y, canvasWidth/4, layer2Thickness);
-            ctx.drawImage(imgAngle90, 0, 0, widthHalfImage, heightImage, canvasWidth/8 * 7 - 0.1 + paddingLeft, positionTier2Y, canvasWidth/8, layer2Thickness);
-            // DRAW TIER 4
-            ctx.drawImage(imgAngle90, widthHalfImage, 0, widthHalfImage, heightImage, paddingLeft, positionTier4Y, canvasWidth/8, layer4Thickness);
-            ctx.drawImage(imgAngle90, canvasWidth/8 - 0.1 + paddingLeft, positionTier4Y, canvasWidth/4, layer4Thickness);
-            ctx.drawImage(imgAngle90, canvasWidth/8 * 3 - 0.1 + paddingLeft, positionTier4Y, canvasWidth/4, layer4Thickness);
-            ctx.drawImage(imgAngle90, canvasWidth/8 * 5 - 0.1 + paddingLeft, positionTier4Y, canvasWidth/4, layer4Thickness);
-            ctx.drawImage(imgAngle90, 0, 0, widthHalfImage, heightImage, canvasWidth/8 * 7 - 0.1 + paddingLeft, positionTier4Y, canvasWidth/8, layer4Thickness);
-        };
-        // Source Image 
-        imgAngle0.src = 'images/paralel-grain-0.jpg';
-        imgAngle90.src = 'images/perpendicular-grain-90.jpg';
+        // DRAW ANGLE 0 
+        for (const key in layup) {
+            if (layup.hasOwnProperty(key)) {
+                const value = layup[key];
+                const position = totalThickness + paddingTop;            
+                if(value.angle == 0){
+                    let imgAngle0 = new Image();
+                    imgAngle0.onload = function(){
+                        ctx.drawImage(imgAngle0, paddingLeft, position, canvasWidth, value.thickness);
+                    };
+                    imgAngle0.src = 'images/paralel-grain-0.jpg';
+                }else if(value.angle == 90){
+                    let imgAngle90 = new Image();
+                    imgAngle90.onload = function() {
+                        let widthHalfImage = imgAngle90.width / 2;
+                        let heightImage = imgAngle90.height;
+                    
+                        ctx.drawImage(imgAngle90, widthHalfImage, 0, widthHalfImage, heightImage, paddingLeft, position, canvasWidth/8, value.thickness);
+                        ctx.drawImage(imgAngle90, canvasWidth/8 - 0.1 + paddingLeft, position, canvasWidth/4, value.thickness);
+                        ctx.drawImage(imgAngle90, canvasWidth/8 * 3 - 0.1 + paddingLeft, position, canvasWidth/4, value.thickness);
+                        ctx.drawImage(imgAngle90, canvasWidth/8 * 5 - 0.1 + paddingLeft, position, canvasWidth/4, value.thickness);
+                        ctx.drawImage(imgAngle90, 0, 0, widthHalfImage, heightImage, canvasWidth/8 * 7 - 0.1 + paddingLeft, position, canvasWidth/8, value.thickness);
+                    };
+                    imgAngle90.src = 'images/perpendicular-grain-90.jpg';            
+                }
+                totalThickness += value.thickness;
+            }
+        }
         
-        // Draw Line Bottom 
-        let totalThickness = layup.t1.thickness + layup.t2.thickness + layup.t3.thickness + layup.t4.thickness + layup.t5.thickness;
+        // ctx.font = "8px Arial";
+        // ctx.fillText("t2:" + layer2Thickness + " " + layup.t2.grade, canvasWidth + 45, positionTier2Y + (layer2Thickness/2));
+        // ctx.fillText("t3:" + layer3Thickness + " " + layup.t3.grade, canvasWidth + 45, positionTier3Y + (layer3Thickness/2));
+        // ctx.fillText("t4:" + layer4Thickness + " " + layup.t4.grade, canvasWidth + 45, positionTier4Y + (layer4Thickness/2));
+        // ctx.fillText("t5:" + layer5Thickness + " " + layup.t5.grade, canvasWidth + 45, positionTier5Y + (layer5Thickness/2));
+        // ctx.restore();
+        
+        // imgAngle0.onload = function(){
+        //     // DRAW TIER 1
+        //     ctx.drawImage(imgAngle0, paddingLeft, positionTier1Y, canvasWidth, layer1Thickness);
+        //     // DRAW TIER 3
+        //     ctx.drawImage(imgAngle0, paddingLeft, positionTier3Y, canvasWidth, layer3Thickness);
+        //     // DRAW TIER 5
+        //     ctx.drawImage(imgAngle0, paddingLeft, positionTier5Y, canvasWidth, layer5Thickness);
+        // };
+
         // Draw Ruler Bottom 
+        // this.drawTextRight(layup, canvasWidth);
         this.drawRulerBottom(totalThickness, canvasWidth);
         // Draw Ruler Left
         this.drawRulerLeft(totalThickness, canvasWidth);
         // Draw Note Right
-        ctx.font = "8px Arial";
-        ctx.fillText("t1:" + layer1Thickness + " " + layup.t1.grade, canvasWidth + 45, layer1Thickness/2 + paddingTop);
-        ctx.fillText("t2:" + layer2Thickness + " " + layup.t2.grade, canvasWidth + 45, positionTier2Y + (layer2Thickness/2));
-        ctx.fillText("t3:" + layer3Thickness + " " + layup.t3.grade, canvasWidth + 45, positionTier3Y + (layer3Thickness/2));
-        ctx.fillText("t4:" + layer4Thickness + " " + layup.t4.grade, canvasWidth + 45, positionTier4Y + (layer4Thickness/2));
-        ctx.fillText("t5:" + layer5Thickness + " " + layup.t5.grade, canvasWidth + 45, positionTier5Y + (layer5Thickness/2));
-        ctx.restore();
+        
     },
 
     /**
-     * Add more functions as you need
-     */
-    
+        * Add more functions as you need
+    */
+
     /**  @param     totalThickness 
                     canvasWidth
     */
@@ -188,4 +182,19 @@ LayupDrawer.prototype = {
         context.fillText("Slab Thickness (mm)", (totalThickness / 2) - this.PADDINGTOP, 10); 
         context.restore(); 
     },
+    drawTextRight: function (layup, canvasWidth){
+        let canvas = this.canvas;
+        let ctx = canvas.getContext('2d');
+        let totalThickness = 0;
+        for (const key in layup) {
+            if (layup.hasOwnProperty(key)) {
+                const value = layup[key];
+                const position = totalThickness + this.PADDINGTOP;     
+                ctx.font = "8px Arial";
+                ctx.fillText("t1:" + 200 + " " + 400, canvasWidth + 45, 0);
+                ctx.restore();
+                totalThickness += value.thickness;
+            }
+        }
+    }
 };
